@@ -1,0 +1,103 @@
+package newinjava;
+import java.util.*;
+import java.io.*;
+
+class node{
+	int n;
+	node left;
+	node right;
+	node(int n){
+		this.n=n;
+		left=null;
+		right=null;
+	}
+}
+
+class BinaryTree{
+	node root;
+	void levelordertraversal(node temp) {
+		Queue<node> q = new LinkedList<>();
+		q.add(temp);
+		if(temp==null) {
+			return;
+		}
+		while(!q.isEmpty()) {
+			node N=q.poll();
+			if(N.left!=null) q.add(N.left);
+			if(N.right!=null) q.add(N.right);
+			System.out.print(N.n);
+		}
+	}
+	void inordertraversal(node temp){
+		if(temp.left!=null) {
+			inordertraversal(temp.left);
+		}
+		System.out.print(temp.n+" ");
+		if(temp.right!=null) {
+			inordertraversal(temp.right);
+		}
+	}
+	void preordertraversal(node temp) {
+		if(temp==null) {
+			return;
+		}
+		System.out.print(temp.n+" ");
+		preordertraversal(temp.left);
+		preordertraversal(temp.right);
+	}
+	void postordertraversal(node temp){
+		if(temp==null) {
+			return;
+		}
+		postordertraversal(temp.left);
+		postordertraversal(temp.right);
+		System.out.print(temp.n+" ");
+	}
+}
+
+public class newinjava{
+	public static void main(String []args) throws IOException {
+		BinaryTree bt = new BinaryTree();
+		bt.root=new node(1);
+		bt.root.left=new node(2);
+		bt.root.right=new node(3);
+		bt.root.left.left=new node(4);   
+		bt.root.left.right=new node(5);
+		bt.root.left.right.left=new node(6);
+		bt.root.left.right.right=new node(7);
+//		                   1
+//		              2         3
+//		           4    5
+//		                   6 
+		bt.inordertraversal(bt.root);System.out.println();
+		bt.preordertraversal(bt.root);System.out.println();
+		bt.postordertraversal(bt.root);System.out.println();
+		bt.levelordertraversal(bt.root);System.out.println(	);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+
+
+
+
+
+
+
+
