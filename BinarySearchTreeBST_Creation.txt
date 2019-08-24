@@ -1,0 +1,79 @@
+package bt;
+
+
+class bt{
+	public static void main(String [] args) {
+		operation tree = new operation();
+		tree.add(50);
+		tree.add(25);
+		tree.add(75);
+		tree.add(10);
+		tree.add(30);
+		tree.add(60);
+		tree.add(65);
+		tree.add(80);
+		tree.add(85);
+		tree.add(1000);
+		tree.traverse();
+	}
+}
+class node{
+	int data;
+	node leftchild;
+	node rightchild;
+	
+}
+class operation {
+	node root;
+	
+	void add(int data) {
+	node nodetoadd = new node();
+	nodetoadd.data=data;
+	if(root==null) {
+		root=nodetoadd;
+	}else if(root!=null) {
+		traverseandadd(nodetoadd,root);
+	}
+	}
+	
+	void traverseandadd(node nodetoadd,node rooter) {
+		node tpnode=rooter;
+		if(nodetoadd.data<tpnode.data) {
+			if(tpnode.leftchild!=null) {
+				tpnode=tpnode.leftchild;
+				traverseandadd(nodetoadd, tpnode);
+			}else {
+				tpnode.leftchild=nodetoadd;
+			}
+		}
+		else if(nodetoadd.data>tpnode.data) {
+				if(tpnode.rightchild!=null) {
+					tpnode=tpnode.rightchild;
+					traverseandadd(nodetoadd, tpnode);
+				}else {
+					tpnode.rightchild=nodetoadd;
+				}
+			}
+		}
+	
+	
+	void traverse() {
+//		node node=root;
+		if(root==null) {
+			System.out.println("nothing to display");
+		}else {
+			traverseanddisp(root);
+		}
+	}
+	
+
+	void traverseanddisp(node node) {
+		if(node.rightchild!=null) {
+			traverseanddisp(node.rightchild);
+		}
+		System.out.println(node.data);
+		if(node.leftchild!=null) {
+			traverseanddisp(node.leftchild);
+		}
+	}
+	}
