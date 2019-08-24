@@ -1,0 +1,81 @@
+import java.util.Arrays;
+
+public class MaxHeap{
+	static int heap[];
+	private static int size;
+	MaxHeap(int heapsize){
+		heap=new int[heapsize+1];
+		size=1;
+		heap[0]=Integer.MAX_VALUE;
+	}
+	public int parent (int index) {
+		return index/2;
+	}
+	public void swap(int high,int low) {
+		int temp=heap[high];
+		heap[high]=heap[low];
+		heap[low]=temp;
+	}
+	
+	public void insert(int data) {
+		heap[size]=data;
+		size++;
+		int tempsize=size;
+		while(heap[size-1]>heap[parent(size-1)]) {
+			swap(size-1,parent(size-1));
+			size=parent(size-1)+1;
+		}
+		size=tempsize;
+	}
+	public boolean isleaf(int pos) {
+		if(pos<=(size-1)/2 && pos<=size-1) {
+			return true;
+		}
+		return false;
+	}
+	public void maxheapify(int pos) {
+		if(!isleaf(pos)) {
+			return;
+		}
+		if(heap[pos]<heap[2*pos] || heap[pos]<heap[(2*pos)+1]) {
+			if(heap[2*pos]>heap[(2*pos)+1]) {
+				swap(pos,2*pos);
+				maxheapify(2*pos);
+			}else {
+				swap(pos,(2*pos)+1);
+				maxheapify((2*pos)+1);
+			}
+		}
+	}
+	
+	public int extractMax() {
+		int data=heap[1];
+		heap[1]=heap[size-1];
+		size--;
+		maxheapify(1);
+		return data;
+	}
+	public void heapsort(int till) {
+		for(int i=0;i<till-1;i++) {
+			System.out.println(extractMax());
+		}
+	}
+	
+	public static void main(String []args) {
+		System.out.println("the max heap is: ");
+		MaxHeap maxHeap = new MaxHeap(15);
+		maxHeap.insert(5); 
+		maxHeap.insert(3); 
+		maxHeap.insert(17); 
+		maxHeap.insert(10); 
+		maxHeap.insert(84); 
+		maxHeap.insert(19); 
+		maxHeap.insert(6); 
+		maxHeap.insert(22); 
+		maxHeap.insert(9);
+		maxHeap.heapsort(size);
+		
+		System.out.println(Arrays.toString(heap));
+		
+	}
+}
