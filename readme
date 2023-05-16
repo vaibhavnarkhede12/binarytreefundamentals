@@ -1,1 +1,15 @@
 https://docs.google.com/spreadsheets/d/1IxmiL6end-0r8rgzrNJyofkusADsa0XUtYaYXYZRQvM/edit#gid=0
+
+
+
+#!/bin/bash
+
+CONNECTION_NAME="YOUR_CONNECTION_NAME"
+
+# Get a list of connection IDs matching the specified name
+connection_ids=$(airflow connections list | awk -v name="$CONNECTION_NAME" '$2 == name {print $1}')
+
+# Loop through the connection IDs and delete each connection
+for conn_id in $connection_ids; do
+    airflow connections --delete --conn_id "$conn_id"
+done
