@@ -2,6 +2,11 @@ https://docs.google.com/spreadsheets/d/1IxmiL6end-0r8rgzrNJyofkusADsa0XUtYaYXYZR
 
 
 
+
+
+
+
+
 #!/bin/bash
 
 CONNECTION_NAME="YOUR_CONNECTION_NAME"
@@ -13,3 +18,29 @@ connection_ids=$(airflow connections list | awk -v name="$CONNECTION_NAME" '$2 =
 for conn_id in $connection_ids; do
     airflow connections --delete --conn_id "$conn_id"
 done
+
+
+import json
+from airflow import models
+
+connections = models.Connection().find_all()
+
+json_file = '/path/to/connections.json'
+
+connections_data = []
+for connection in connections:
+    connections_data.append({
+        'conn_id': connection.conn_id,
+        'conn_type': connection.conn_type,
+        'host': connection.host,
+        'login': connection.login,
+        'password': connection.password,
+        'schema': connection.schema,
+        'port': connection.port,
+        'extra': connection.extra
+    })
+
+with open(json_file, 'w') as file:
+    json.dump(connections_data, file, indent=4)
+
+print(f"Connections exported to {json_file}")
