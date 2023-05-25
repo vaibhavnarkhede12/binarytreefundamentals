@@ -1,6 +1,34 @@
 https://docs.google.com/spreadsheets/d/1IxmiL6end-0r8rgzrNJyofkusADsa0XUtYaYXYZRQvM/edit#gid=0
 
 
+from google.cloud import sql_v1beta4
+from google.auth import credentials
+
+PROJECTS = ["project1-id", "project2-id", "project3-id"]
+
+for project_id in PROJECTS:
+    print(f"Project: {project_id}\n")
+
+    # Create the Cloud SQL client
+    credentials, _ = google.auth.default()
+    client = sql_v1beta4.CloudSqlClient(credentials=credentials)
+
+    # Get a list of Cloud SQL instances
+    instances = client.list_instances(project=project_id)
+
+    # Iterate over each instance
+    for instance in instances:
+        instance_name = instance.name
+        labels = instance.resource.labels
+
+        # Check if the label 'terraformed=true' is not present
+        if not labels or labels.get("terraformed") != "true":
+            print(instance_name)
+
+    print()
+
+
+
 import subprocess
 
 PROJECTS = ["project1-id", "project2-id", "project3-id"]
