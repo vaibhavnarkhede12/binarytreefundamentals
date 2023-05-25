@@ -1,5 +1,30 @@
 https://docs.google.com/spreadsheets/d/1IxmiL6end-0r8rgzrNJyofkusADsa0XUtYaYXYZRQvM/edit#gid=0
 
+$projects = @("project1-id", "project2-id", "project3-id")
+
+foreach ($projectID in $projects) {
+    Write-Host "Project: $projectID`n"
+
+    # Get a list of Cloud SQL instances
+    $instances = gcloud sql instances list --project $projectID --format="value(NAME)" | ForEach-Object { $_.Trim() }
+
+    # Iterate over each instance
+    foreach ($instance in $instances) {
+        # Get the labels for the instance
+        $labels = gcloud sql instances describe $instance --project $projectID --format="value(labels)"
+
+        # Check if the label 'terraformed=true' is not present
+        if (-not $labels -or $labels -notlike "*terraformed=true*") {
+            Write-Host $instance
+        }
+    }
+
+    Write-Host
+}
+
+
+
+
 
 from google.cloud import sql_v1beta4
 from google.auth import credentials
