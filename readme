@@ -73,3 +73,31 @@ with open(json_file, 'w') as file:
     json.dump(connections_data, file, indent=4)
 
 print(f"Connections exported to {json_file}")
+
+
+
+#!/bin/bash
+
+PROJECTS=("project1-id" "project2-id" "project3-id")
+
+# Iterate over each project
+for PROJECT_ID in "${PROJECTS[@]}"; do
+  echo "Project: ${PROJECT_ID}"
+
+  # Get a list of Cloud SQL instances
+  INSTANCES=$(gcloud sql instances list --project "${PROJECT_ID}" --format "value(NAME)")
+
+  # Iterate over each instance
+  for INSTANCE in ${INSTANCES}; do
+    # Get the labels for the instance
+    LABELS=$(gcloud sql instances describe "${INSTANCE}" --project "${PROJECT_ID}" --format "value(labels)")
+
+    # Check if the label 'terraformed=true' is not present
+    if [[ ! "${LABELS}" =~ terraformed=true ]]; then
+      echo "${INSTANCE}"
+    fi
+  done
+
+  echo
+done
+
