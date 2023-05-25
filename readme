@@ -1,6 +1,35 @@
 https://docs.google.com/spreadsheets/d/1IxmiL6end-0r8rgzrNJyofkusADsa0XUtYaYXYZRQvM/edit#gid=0
 
 
+import subprocess
+
+PROJECTS = ["project1-id", "project2-id", "project3-id"]
+
+for project_id in PROJECTS:
+    print(f"Project: {project_id}\n")
+
+    # Get a list of Cloud SQL instances
+    instances_output = subprocess.check_output(
+        f"gcloud sql instances list --project {project_id} --format='value(NAME)'",
+        shell=True,
+    )
+    instances = instances_output.decode("utf-8").strip().split("\n")
+
+    # Iterate over each instance
+    for instance in instances:
+        # Get the labels for the instance
+        labels_output = subprocess.check_output(
+            f"gcloud sql instances describe {instance} --project {project_id} --format='value(labels)'",
+            shell=True,
+        )
+        labels = labels_output.decode("utf-8").strip()
+
+        # Check if the label 'terraformed=true' is not present
+        if "terraformed=true" not in labels:
+            print(instance)
+
+    print()
+
 
 
 
