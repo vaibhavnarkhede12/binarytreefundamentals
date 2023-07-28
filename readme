@@ -1,6 +1,33 @@
-https://docs.google.com/spreadsheets/d/1IxmiL6end-0r8rgzrNJyofkusADsa0XUtYaYXYZRQvM/edit#gid=0
+gcloud compute instances describe INSTANCE_NAME \
+    --project=YOUR_PROJECT_ID \
+    --zone=YOUR_INSTANCE_ZONE \
+    --format="value(instanceGroup)"
 
-$projects = @("project1-id", "project2-id", "project3-id")
+gcloud compute instance-groups describe INSTANCE_GROUP_NAME \
+    --project=YOUR_PROJECT_ID \
+    --zone=YOUR_INSTANCE_GROUP_ZONE \
+    --format="value(backends)"
+
+# Step 1: Find the forwarding rule associated with the backend service
+BACKEND_SERVICE_NAME="YOUR_BACKEND_SERVICE_NAME"
+gcloud compute backend-services describe "${BACKEND_SERVICE_NAME}" \
+    --project=YOUR_PROJECT_ID \
+    --global \
+    --format="value(selfLink)" | \
+    xargs gcloud compute forwarding-rules list \
+    --project=YOUR_PROJECT_ID \
+    --global \
+    --format="table(NAME)"
+
+# Step 2: Get the IP address of the forwarding rule used
+FORWARDING_RULE_NAME="YOUR_FORWARDING_RULE_NAME"
+gcloud compute forwarding-rules describe "${FORWARDING_RULE_NAME}" \
+    --project=YOUR_PROJECT_ID \
+    --global \
+    --format="value(IPAddress)"
+
+
+
 
 foreach ($projectID in $projects) {
     Write-Host "Project: $projectID`n"
