@@ -1,5 +1,58 @@
-trl{
-	name:vaibhav,
-	address:narkhede,
-	id:20
-}
+import json
+import apache_beam as beam
+from apache_beam.options.pipeline_options import PipelineOptions
+from apache_beam.io.gcp.bigquery import WriteToBigQuery
+from apache_beam.io.gcp.pubsub import WriteToPubSub
+from datetime import datetime
+
+class AddTimestampAndToJsonDoFn(beam.DoFn):
+    def process(self, row):
+        try:
+            # Append current UTC timestamp
+            row['timestamp'] = datetime.utcnow().isoformat() + 'Z'
+
+            row_json = json.dumps(row)
+            # Pass (id, json) for success
+            yield beam.pvalue.TaggedOutput('success', (row['id'], row_json))
+        except Exception as e:
+            row['error'] = str(e)
+            yield beam.pvalue.TaggedOutput('failed', row)
+
+def run():
+    options = PipelineOptions(
+        project='YOUR_PROJECT_ID',
+        region='YOUR_REGION',
+        temp_location='gs://YOUR_BUCKET/temp',
+        runner='DataflowRunner',
+        job_name='bq-to-pubsub-job',
+        save_main_session=True
+    )
+
+    with beam.Pipeline(options=options) as p:
+        records = p | "Read from BigQuery" >> beam.io.ReadFromBigQuery(
+            query="SELECT * FROM `your_project.your_dataset.source_table`",
+            use_standard_sql=True
+        )
+
+        processed = (records
+                     | "Add timestamp and convert to JSON" >> beam.ParDo(AddTimestampAndToJsonDoFn()).with_outputs('success', 'failed'))
+
+        # Write successful records to Pub/Sub
+        (processed.success
+         | "Extract JSON values" >> beam.Map(lambda tup: tup[1].encode('utf-8'))
+         | "Write to PubSub" >> WriteToPubSub(topic="projects/YOUR_PROJECT_ID/topics/YOUR_TOPIC"))
+
+        # Write failed records to error table
+        (processed.failed
+         | "Write failed to BigQuery" >> WriteToBigQuery(
+             table='your_project:your_dataset.error_table',
+             schema='SCHEMA_AUTODETECT',
+             write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND))
+
+        # Save IDs of successful records to temp table for deletion
+        (processed.success
+         | "Extract IDs" >> beam.Map(lambda tup: {'id': tup[0]})
+         | "Write IDs to temp table" >> WriteToBigQuery(
+             table='your_project:your_dataset.success_ids_temp',
+             schema='id:STRING',
+             write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE))
